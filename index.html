@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,9 +9,9 @@
         body { font-family: "Inter", sans-serif; }
     </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 p-4 sm:p-8 min-h-screen">
 
-    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-4xl border border-gray-200">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-4xl mx-auto border border-gray-200">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6 text-center">Mid-Month Pay Calculator</h1>
         <p class="text-center text-gray-600 mb-8">
             Calculate prorated base salary and commission for a mid-month position change.
@@ -108,13 +108,11 @@
     <script>
         // Helper function to get the number of days in a given month and year
         function daysInMonth(month, year) {
-            // month is 0-indexed for the Date object, so we add 1
             return new Date(year, month + 1, 0).getDate();
         }
 
         // Main calculation logic
         function calculatePay() {
-            // Get all input values
             const originalAnnualSalary = parseFloat(document.getElementById('originalAnnualSalary').value) || 0;
             const originalMonthlyQuota = parseFloat(document.getElementById('originalMonthlyQuota').value) || 0;
             const originalCommissionPercentage = parseFloat(document.getElementById('originalCommissionPercentage').value) || 0;
@@ -129,7 +127,6 @@
             const resultsDiv = document.getElementById('results');
             const errorMessageDiv = document.getElementById('error-message');
 
-            // Simple validation
             if (!changeDateInput) {
                 errorMessageDiv.textContent = 'Please select a date for the change.';
                 errorMessageDiv.classList.remove('hidden');
@@ -138,50 +135,38 @@
             }
 
             try {
-                // Manually parse date to avoid timezone issues
                 const [yearStr, monthStr, dayStr] = changeDateInput.split('-');
                 const year = parseInt(yearStr, 10);
-                const month = parseInt(monthStr, 10) - 1; // getMonth() is 0-indexed
+                const month = parseInt(monthStr, 10) - 1;
                 const dayOfChange = parseInt(dayStr, 10);
                 
                 const totalDaysInMonth = daysInMonth(month, year);
-                
-                // Calculate days in each position
                 const daysInOriginalPosition = dayOfChange - 1;
                 const daysInNewPosition = totalDaysInMonth - daysInOriginalPosition;
                 
                 if (daysInOriginalPosition < 0 || daysInNewPosition < 0) {
-                     errorMessageDiv.textContent = 'Date of change must be a valid date within the month.';
+                     errorMessageDiv.textContent = 'Date of change must be valid within the month.';
                      errorMessageDiv.classList.remove('hidden');
                      resultsDiv.classList.add('hidden');
                      return;
                 }
 
-                // Calculate daily salaries
                 const originalDailySalary = (originalAnnualSalary / 52) / 7;
                 const newDailySalary = (newAnnualSalary / 52) / 7;
                 
-                // Prorated Base Salary
                 const proratedOriginalBase = originalDailySalary * daysInOriginalPosition;
                 const proratedNewBase = newDailySalary * daysInNewPosition;
                 const totalProratedBase = proratedOriginalBase + proratedNewBase;
 
-                // Prorated Quota
                 const proratedOriginalQuota = (originalMonthlyQuota / totalDaysInMonth) * daysInOriginalPosition;
                 const proratedNewQuota = (newMonthlyQuota / totalDaysInMonth) * daysInNewPosition;
                 const totalProratedQuota = proratedOriginalQuota + proratedNewQuota;
                 
-                // Weighted Commission Percentage
                 const weightedCommissionPercentage = ((originalCommissionPercentage * daysInOriginalPosition) + (newCommissionPercentage * daysInNewPosition)) / totalDaysInMonth;
-
-                // Commission Calculation
                 const commissionableRevenue = Math.max(0, totalMonthlyRevenue - totalProratedQuota);
                 const totalCommissionEarned = commissionableRevenue * weightedCommissionPercentage;
-                
-                // Total Pay
                 const totalPay = totalProratedBase + totalCommissionEarned;
 
-                // Display results
                 document.getElementById('proratedBase').textContent = `$${totalProratedBase.toFixed(2)}`;
                 document.getElementById('totalQuota').textContent = `$${totalProratedQuota.toFixed(2)}`;
                 document.getElementById('totalCommission').textContent = `$${totalCommissionEarned.toFixed(2)}`;
@@ -196,15 +181,8 @@
             }
         }
 
-        // Add event listener to the button
         document.getElementById('calculateButton').addEventListener('click', calculatePay);
-        
-        // Add event listeners to input fields to trigger calculation on change
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', calculatePay);
-        });
-
-        // Run calculation on initial load with default values
+        document.querySelectorAll('input').forEach(input => input.addEventListener('input', calculatePay));
         document.addEventListener('DOMContentLoaded', calculatePay);
     </script>
 </body>
